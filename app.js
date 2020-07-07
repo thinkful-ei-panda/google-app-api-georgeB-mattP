@@ -35,9 +35,9 @@ app.get('/movies', (req, res) => {
 		if (!isNaN(parseFloat(genre))) {
 			error = `"Genre" must not contain numbers`
 		}
+		const genreLow = genre.toLowerCase()
 		results = movies.filter(
-			(movie) =>
-				movie.genre.toLowerCase() === genre.toLowerCase()
+			(movie) => movie.genre.toLowerCase() === genreLow
 		)
 		results.length < 1 &&
 			(message = 'Sorry no movies found searching that genre')
