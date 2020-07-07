@@ -57,7 +57,7 @@ app.get('/movies', (req, res) => {
 	}
 
 	if (avg_vote) {
-		if (!parseFloat(avg_vote) || avg_vote >= 10 || avg_vote < 1) {
+		if (!parseFloat(avg_vote) || avg_vote > 10 || avg_vote < 1) {
 			error = `"Average Vote" must be a number from 1 - 10`
 		}
 		results = movies.filter((movie) => movie.avg_vote >= avg_vote)
