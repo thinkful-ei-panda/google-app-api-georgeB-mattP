@@ -29,10 +29,11 @@ app.get('/movies', (req, res) => {
 	const movies = [...MOVIES]
 	let results = movies
 	let message
+	let error
 
 	if (genre) {
 		if (!isNaN(parseFloat(genre))) {
-			res.status(400).send(`"Genre" must not contain numbers`)
+			error = `"Genre" must not contain numbers`
 		}
 		results = movies.filter(
 			(movie) =>
@@ -44,7 +45,7 @@ app.get('/movies', (req, res) => {
 
 	if (country) {
 		if (!isNaN(parseFloat(country))) {
-			res.status(400).send(`"Country" must not contain numbers`)
+			error = `"Country" must not contain numbers`
 		}
 		const countryLow = country.toLowerCase()
 		results = movies.filter(
@@ -56,23 +57,21 @@ app.get('/movies', (req, res) => {
 	}
 
 	if (avg_vote) {
-		if (!parseFloat(avg_vote) || avg_vote > 10 || avg_vote < 1) {
-			res.status(400).send(
-				`"Average Vote" must be a number from 1 - 10`
-			)
+		if (!parseFloat(avg_vote) || avg_vote >= 10 || avg_vote < 1) {
+			error = `"Average Vote" must be a number from 1 - 10`
 		}
 		results = movies.filter((movie) => movie.avg_vote >= avg_vote)
 		results.length < 1 &&
 			(message = `Sorry no movies found above rating: ${avg_vote}`)
 	}
 
-	if (message) {
-		res.send(message)
-	} else {
-		res.json(results)
-	}
+	error
+		? res.status(400).send(error)
+		: message
+		? res.send(message)
+		: res.json(results)
 })
 
 app.listen(port, () =>
-	console.log(`Example app listening on port ${port}!`)
+	console.log(`Server listening on port ${port}!`)
 )
