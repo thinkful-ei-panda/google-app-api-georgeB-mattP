@@ -28,6 +28,7 @@ app.get('/movies', (req, res) => {
 	const { genre, country, avg_vote } = req.query
 	const movies = [...MOVIES]
 	let results = movies
+	let message
 
 	if (genre) {
 		if (!isNaN(parseFloat(genre))) {
@@ -38,9 +39,7 @@ app.get('/movies', (req, res) => {
 				movie.genre.toLowerCase() === genre.toLowerCase()
 		)
 		results.length < 1 &&
-			res.send({
-				message: 'Sorry no movies found searching that genre',
-			})
+			(message = 'Sorry no movies found searching that genre')
 	}
 
 	if (country) {
@@ -52,10 +51,8 @@ app.get('/movies', (req, res) => {
 			(movie) => movie.country.toLowerCase() === countryLow
 		)
 		results.length < 1 &&
-			res.status(400).send({
-				message:
-					'Sorry no movies found searching by that country',
-			})
+			(message =
+				'Sorry no movies found searching by that country')
 	}
 
 	if (avg_vote) {
@@ -66,12 +63,14 @@ app.get('/movies', (req, res) => {
 		}
 		results = movies.filter((movie) => movie.avg_vote >= avg_vote)
 		results.length < 1 &&
-			res.status(400).send({
-				message: `Sorry no movies found above rating: ${avg_vote}`,
-			})
+			(message = `Sorry no movies found above rating: ${avg_vote}`)
 	}
 
-	res.json(results)
+	if (message) {
+		res.send(message)
+	} else {
+		res.json(results)
+	}
 })
 
 app.listen(port, () =>
