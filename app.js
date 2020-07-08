@@ -1,4 +1,4 @@
-require('dotenv').config
+require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
 
@@ -24,10 +24,9 @@ app.use(function validateBearerToken(req, res, next) {
 	next()
 })
 
-app.get('/movies', (req, res) => {
+app.get('/movie', (req, res) => {
 	const { genre, country, avg_vote } = req.query
-	const movies = [...MOVIES]
-	let results = movies
+	let movies = [...MOVIES]
 	let message
 	let error
 
@@ -36,10 +35,10 @@ app.get('/movies', (req, res) => {
 			error = `"Genre" must not contain numbers`
 		}
 		const genreLow = genre.toLowerCase()
-		results = movies.filter(
-			(movie) => movie.genre.toLowerCase() === genreLow
+		movies = movies.filter((movie) =>
+			movie.genre.toLowerCase().includes(genreLow)
 		)
-		results.length < 1 &&
+		movies.length < 1 &&
 			(message = 'Sorry no movies found searching that genre')
 	}
 
@@ -48,10 +47,10 @@ app.get('/movies', (req, res) => {
 			error = `"Country" must not contain numbers`
 		}
 		const countryLow = country.toLowerCase()
-		results = movies.filter(
-			(movie) => movie.country.toLowerCase() === countryLow
+		movies = movies.filter((movie) =>
+			movie.country.toLowerCase().includes(countryLow)
 		)
-		results.length < 1 &&
+		movies.length < 1 &&
 			(message =
 				'Sorry no movies found searching by that country')
 	}
@@ -60,8 +59,8 @@ app.get('/movies', (req, res) => {
 		if (!parseFloat(avg_vote) || avg_vote > 10 || avg_vote < 1) {
 			error = `"Average Vote" must be a number from 1 - 10`
 		}
-		results = movies.filter((movie) => movie.avg_vote >= avg_vote)
-		results.length < 1 &&
+		movies = movies.filter((movie) => movie.avg_vote >= avg_vote)
+		movies.length < 1 &&
 			(message = `Sorry no movies found above rating: ${avg_vote}`)
 	}
 
@@ -69,7 +68,7 @@ app.get('/movies', (req, res) => {
 		? res.status(400).send(error)
 		: message
 		? res.send(message)
-		: res.json(results)
+		: res.json(movies)
 })
 
 app.listen(port, () =>
