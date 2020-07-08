@@ -38,8 +38,6 @@ app.get('/movie', (req, res) => {
 		movies = movies.filter((movie) =>
 			movie.genre.toLowerCase().includes(genreLow)
 		)
-		movies.length < 1 &&
-			(message = 'Sorry no movies found searching that genre')
 	}
 
 	if (country) {
@@ -50,9 +48,6 @@ app.get('/movie', (req, res) => {
 		movies = movies.filter((movie) =>
 			movie.country.toLowerCase().includes(countryLow)
 		)
-		movies.length < 1 &&
-			(message =
-				'Sorry no movies found searching by that country')
 	}
 
 	if (avg_vote) {
@@ -60,9 +55,10 @@ app.get('/movie', (req, res) => {
 			error = `"Average Vote" must be a number from 1 - 10`
 		}
 		movies = movies.filter((movie) => movie.avg_vote >= avg_vote)
-		movies.length < 1 &&
-			(message = `Sorry no movies found above rating: ${avg_vote}`)
 	}
+
+	movies.length < 1 &&
+		(message = 'Sorry no movies found...search again?')
 
 	error
 		? res.status(400).send(error)
