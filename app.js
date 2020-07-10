@@ -6,10 +6,11 @@ const MOVIES = require('./MOVIES.json')
 const helmet = require('helmet')
 const cors = require('cors')
 const { API_TOKEN, NODE_ENV } = require('./config')
+const logger = require('./logger')
 
 const app = express()
 const morganSetting = NODE_ENV === 'production' ? 'tiny' : 'common'
-app.use(morganSetting)
+app.use(morgan(morganSetting))
 app.use(helmet())
 app.use(cors())
 
@@ -18,6 +19,7 @@ app.use(function validateBearerToken(req, res, next) {
 	const apiToken = API_TOKEN
 
 	if (!authToken || authToken.split(' ')[1] !== apiToken) {
+		logger.error('Unauthorized request')
 		return res.status(401).json({ error: 'Unauthorized request' })
 	}
 
@@ -69,4 +71,15 @@ app.get('/movie', (req, res) => {
 		: message
 		? res.json(message)
 		: res.json(movies)
+})
+
+// eslint-disable-next-line no-unused-vars
+app.use((error, req, res, _next) => {
+	let response
+	if (process.env.NODE_ENV === 'production') {
+		response = { error: { message: 'server error' } }
+	} else {
+		response = { error }
+	}
+	res.status(500).json(response)
 })
