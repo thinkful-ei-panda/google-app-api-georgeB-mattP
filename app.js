@@ -5,17 +5,17 @@ const morgan = require('morgan')
 const MOVIES = require('./MOVIES.json')
 const helmet = require('helmet')
 const cors = require('cors')
-const port = 3000
+const { API_TOKEN, NODE_ENV } = require('./config')
 
 const app = express()
-
-app.use(morgan('dev'))
+const morganSetting = NODE_ENV === 'production' ? 'tiny' : 'common'
+app.use(morganSetting)
 app.use(helmet())
 app.use(cors())
 
 app.use(function validateBearerToken(req, res, next) {
 	const authToken = req.get('Authorization')
-	const apiToken = process.env.API_TOKEN
+	const apiToken = API_TOKEN
 
 	if (!authToken || authToken.split(' ')[1] !== apiToken) {
 		return res.status(401).json({ error: 'Unauthorized request' })
@@ -32,7 +32,7 @@ app.get('/movie', (req, res) => {
 
 	if (genre) {
 		if (!isNaN(parseFloat(genre))) {
-			error = `"Genre" must not contain numbers`
+			error = { error: `"Genre" must not contain numbers` }
 		}
 		const genreLow = genre.toLowerCase()
 		movies = movies.filter((movie) =>
@@ -42,7 +42,7 @@ app.get('/movie', (req, res) => {
 
 	if (country) {
 		if (!isNaN(parseFloat(country))) {
-			error = `"Country" must not contain numbers`
+			error = { error: `"Country" must not contain numbers` }
 		}
 		const countryLow = country.toLowerCase()
 		movies = movies.filter((movie) =>
@@ -52,21 +52,21 @@ app.get('/movie', (req, res) => {
 
 	if (avg_vote) {
 		if (!parseFloat(avg_vote) || avg_vote > 10 || avg_vote < 1) {
-			error = `"Average Vote" must be a number from 1 - 10`
+			error = {
+				error: `"Average Vote" must be a number from 1 - 10`,
+			}
 		}
 		movies = movies.filter((movie) => movie.avg_vote >= avg_vote)
 	}
 
 	movies.length < 1 &&
-		(message = 'Sorry no movies found...search again?')
+		(message = {
+			message: 'Sorry no movies found...search again?',
+		})
 
 	error
-		? res.status(400).send(error)
+		? res.status(400).json(error)
 		: message
-		? res.send(message)
+		? res.json(message)
 		: res.json(movies)
 })
-
-app.listen(port, () =>
-	console.log(`Server listening on port ${port}!`)
-)
